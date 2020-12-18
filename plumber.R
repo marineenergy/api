@@ -1,4 +1,17 @@
 # plumber.R
+library(dplyr)
+
+#* FERC docs in PRIMRE export metadata formate
+#* @param msg The message to echo
+#* @get /ferc_docs
+function(msg) {
+  # TODO: add parameters, and search database with query to get results
+  records <- tribble(
+    ~URI, ~title,
+    "https://mhk-env.us/ferc_docs/Cobscook-Bay-docA",   "Cobscook Bay doc A",
+    "https://mhk-env.us/ferc_docs/Cobscook-Bay-docB",   "Cobscook Bay doc B")
+  records
+}
 
 #* Echo back the input
 #* @param msg The message to echo
