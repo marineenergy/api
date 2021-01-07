@@ -2,14 +2,13 @@
 library(dplyr)
 
 #* FERC docs in PRIMRE export metadata formate
-#* @param msg The message to echo
 #* @get /ferc_docs
-function(msg) {
+function() {
   # TODO: add parameters, and search database with query to get results
   records <- tribble(
-    ~URI, ~title,
-    "https://mhk-env.us/ferc_docs/Cobscook-Bay-docA",   "Cobscook Bay doc A",
-    "https://mhk-env.us/ferc_docs/Cobscook-Bay-docB",   "Cobscook Bay doc B")
+    ~URI, ~title, ~tags
+    "https://mhk-env.us/ferc_docs/Cobscook-Bay-docA",   "Cobscook Bay doc A", "Marine Mammals; Noise",
+    "https://mhk-env.us/ferc_docs/Cobscook-Bay-docB",   "Cobscook Bay doc B", "Birds; Collision")
   records
 }
 
