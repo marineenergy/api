@@ -1,7 +1,7 @@
 # run API by sourcing this R script in RStudio
 library(plumber)
 
-plumber_r <- "/share/github/mhk-env_api/plumber.R"
+plumber_r <- "/share/github/api/plumber.R"
 
 pr(plumber_r) %>%
   pr_run(port=8888, host="0.0.0.0")
@@ -23,5 +23,5 @@ pr(plumber_r) %>%
 #   sudo kill -9 494
 # To start on rstudio.marinebon.app in Terminal:
 #   sudo su root
-#   Rscript /share/github/mhk-env_api/run_api.R &
+#   Rscript /share/github/api/run_api.R &
 #   exit
