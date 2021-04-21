@@ -1,0 +1,42 @@
+---
+title: "`r params$title`"
+params:
+  title: Default Title
+  receptors:
+  - default1
+  - default2
+output:
+  word_document: default
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+
+library(glue)
+library(dplyr)
+
+bullets <- function(tags, indent=1){
+  glue("{strrep(' ', indent*2)}- {tags}", .trim = F) %>% 
+  paste(collapse = "\n") %>% 
+  cat()
+}
+```
+
+## Receptors
+
+```{r, results='asis'}
+bullets(params$receptors)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+
