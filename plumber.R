@@ -31,9 +31,9 @@ function(spec){
 }
 
 # /ferc_docs ----
-#* FERC docs in PRIMRE export metadata format
-#* @get /ferc_docs
-function() {
+#' FERC docs in PRIMRE export metadata format
+#' @get /ferc_docs
+function(){
   
   dir_data <- here("../apps/data")
   docs_csv <- glue("{dir_data}/ferc_docs2.csv")
