@@ -7,6 +7,7 @@ shelf(dplyr, digest, fs, glue, here, highcharter, purrr, rmarkdown, readr, strin
 
 # TODO: https://rviews.rstudio.com/2019/08/13/plumber-logging/
 
+# /highchart ----
 #' Plot the iris dataset using interactive chart
 #' 
 #' @param spec Species to filter
@@ -29,6 +30,7 @@ function(spec){
     hc_title(text = title)
 }
 
+# /ferc_docs ----
 #* FERC docs in PRIMRE export metadata format
 #* @get /ferc_docs
 function() {
@@ -90,6 +92,7 @@ function() {
   docs
 }
 
+# /echo ----
 #* Echo back the input
 #* @param msg The message to echo
 #* @get /echo
@@ -97,6 +100,7 @@ function(msg="") {
   list(msg = paste0("The message is: '", msg, "'"))
 }
 
+# /plot ----
 #* Plot a histogram
 #* @serializer png
 #* @get /plot
@@ -105,28 +109,43 @@ function() {
   hist(rand)
 }
 
-#* Render report
-#* @param title Title
-#* @param receptors Receptors separated by a space (or comma or both)
+# /report ----
+#* Submit report
+#* @param email Email, e.g.: ben@ecoquants.com
+#* @param date Date, e.g.: 2021-05-25 14:39:21 UTC 
+#* @param title Title, e.g.: Test Report
+#* @param ext FileType (one of: html, pdf, docx), e.g.: html
+#* @param interactions Interactions as JSON, e.g.: [["Receptor.Fish","Stressor.PhysicalInteraction.Collision"],["Technology.Wave","Receptor.Birds"]]
 #* @get /report
 #* @html
 function(
   req,
+  email,
+  date,
   title,
-  receptors = NA,
+  interactions = NA,
   ext       = "html",
   res) {
   # title    = "Test"; receptors = NULL
   
   # paths
-  in_rmd  <- "report_test.Rmd"
-  dir_out <- "/share/api_out"
-  dir_url <- "https://marineenergy.app/api_out"
+  in_rmd      <- "report_test.Rmd"
+  dir_reports <- "/share/user_reports"
+  url_rpt_pfx <- "https://api.marineenergy.app/report"
   
-  args_hash <- digest(req$args)
+  dir_rpt_pfx <- "/share/user_reports"
+  url_rpt_pfx <- "https://marineenergy.app/report/"
+  # sym link:
+  #   ln -s /share/user_reports /share/github/www/report
   
+  meta <- list(
+    Email        = email,
+    Date         = date,
+    Title        = title,
+    FileType     = ext,
+    Interactions = fromJSON(interactions))
   browser()
-  
+
   out_file   <- glue("{dir_out}/me_report_{args_hash}.{ext}")
   out_url    <- glue("{dir_url}/{basename(out_file)}")
   out_format <- c(
@@ -159,11 +178,7 @@ function(
   </html>")
 }
 
-#* @html
-function(req, res) {
-  
-}
-
+# /sum ----
 #* Return the sum of two numbers
 #* @param a The first number to add
 #* @param b The second number to add
@@ -172,6 +187,7 @@ function(a, b) {
   as.numeric(a) + as.numeric(b)
 }
 
+# / ----
 #* redirect to the swagger interface 
 #* @get /
 #* @html
