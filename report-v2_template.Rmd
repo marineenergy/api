@@ -1,0 +1,73 @@
+---
+title: "`r params$title`"
+params:
+  Email: bdbest@gmail.com
+  Date: 2021-05-25 18:17:53 UTC
+  Title: Test Report
+  FileType: html
+  Content:
+    value:
+      Projects: yes
+      Management: yes
+  Interactions:
+    value:
+    - - Receptor.Fish
+      - Stressor.PhysicalInteraction.Collision
+    - - Technology.Wave
+      - Receptor.Birds
+# params: 
+#   title: "Kerry's NY/MA Home Tidal Zone"
+#   aoi_wkt: "POLYGON ((-72.33398 41.01307, -70.5542 43.96119, -65.78613 43.69171, -70.68604
+#     40.43022, -72.33398 41.01307))"
+#   technology: Current
+#   lit_queries:
+#   - Fish AND Collision AND Current
+#   - Fish AND Habitat Change AND Current
+#   spatial_receptors:
+#   - Fish
+#   - Fish
+#   lit_tethys: yes
+#   lit_ferc: null
+#   spatial: yes
+#   mgt_tethys: ~  
+output:
+  html_document:
+    toc: true
+    toc_depth: 4
+    toc_float: true
+    number_sections: true
+    mathjax: null
+  pdf_document:
+    toc: true
+    toc_depth: 4
+    number_sections: true
+    #keep_md: yes
+    latex_engine: xelatex
+  word_document:
+    toc: true
+    toc_depth: 4
+    number_sections: true
+    #keep_md: yes
+editor_options: 
+  chunk_output_type: console
+always_allow_html: true
+---
+
+```{r setup, include=F}
+# render("report-v2_template.Rmd", output_file="report-v2_template.pdf" , output_format="pdf_document")
+# render("report-v2_template.Rmd", output_file="report-v2_template.docx", output_format="word_document")
+# render("report-v2_template.Rmd", output_file="report-v2_template.html", output_format="html_document")
+knitr::opts_chunk$set(echo = F, warning = F, message = F, eval = T)
+```
+
+```{r init}
+source("/share/github/apps_dev/functions.R") # libraries, db connection object (con)
+#rmd_params <- readRDS(here("data/tmp_rmd_params.rds"))
+```
+
+# Configuration
+
+```{r, comment=""}
+list(params) %>% as.yaml() %>% cat()
+```
+

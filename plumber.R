@@ -3,7 +3,10 @@ if (!require(librarian)){
   install.packages("librarian")
   library(librarian)
 }
-shelf(dplyr, digest, fs, glue, here, highcharter, purrr, rmarkdown, readr, stringr, tibble, tidyr)
+shelf(
+  dplyr, digest, fs, glue, here, highcharter, httr, purrr, rmarkdown, readr, 
+  stringr, tibble, tidyr, yaml)
+source("/share/github/apps_dev/functions.R")
 
 # TODO: https://rviews.rstudio.com/2019/08/13/plumber-logging/
 
@@ -110,72 +113,61 @@ function() {
 }
 
 # /report ----
-#* Submit report
+#* Submit report parameters for publishing
 #* @param email Email, e.g.: ben@ecoquants.com
 #* @param date Date, e.g.: 2021-05-25 14:39:21 UTC 
 #* @param title Title, e.g.: Test Report
 #* @param ext FileType (one of: html, pdf, docx), e.g.: html
+#* @param contents Contents as JSON, e.g.: {"Projects":[true],"Management":[true]}
 #* @param interactions Interactions as JSON, e.g.: [["Receptor.Fish","Stressor.PhysicalInteraction.Collision"],["Technology.Wave","Receptor.Birds"]]
 #* @get /report
-#* @html
 function(
   req,
   email,
   date,
   title,
+  ext = "html",
+  content = NA,
   interactions = NA,
-  ext       = "html",
   res) {
-  # title    = "Test"; receptors = NULL
-  
+
   # paths
-  in_rmd      <- "report_test.Rmd"
-  dir_reports <- "/share/user_reports"
-  url_rpt_pfx <- "https://api.marineenergy.app/report"
-  
+  in_rmd      <- "report-v2_template.Rmd"
+  r_script    <- "/share/github/api/scripts/render_yml.R"
   dir_rpt_pfx <- "/share/user_reports"
   url_rpt_pfx <- "https://marineenergy.app/report/"
-  # sym link:
+  # sym link to share dir_rpt_fx to url_rpt_pfx:
   #   ln -s /share/user_reports /share/github/www/report
   
-  meta <- list(
+  # metadata
+  m <- list(
     Email        = email,
     Date         = date,
     Title        = title,
     FileType     = ext,
+    Content      = fromJSON(content),
     Interactions = fromJSON(interactions))
-  browser()
+  # ext = m$FileType; email = m$Email
+  
+  hash <- digest(m, algo="crc32")
+  yml <- glue("{dir_rpt_pfx}/{email}/MarineEnergy.app_report-api_{hash}_plumber.yml")
+  dir.create(dirname(yml), showWarnings = F)
+  write_yaml(m, yml)
 
-  out_file   <- glue("{dir_out}/me_report_{args_hash}.{ext}")
-  out_url    <- glue("{dir_url}/{basename(out_file)}")
-  out_format <- c(
-    "html" = "html_document",
-    "pdf"  = "pdf_document",
-    "docx" = "word_document")[[ext]]
-  receptors  <- str_split(receptors, "[, ]+") %>% unlist()
+  out_file <- glue("{dir_rpt_pfx}/{email}/MarineEnergy.app_report-api_{hash}.{ext}")
+
+  browser()
+  if (!file.exists(out_file)){
+    message(glue("{yml} -> {out_file}"))
+    # /share/user_reports/bdbest@gmail.com/MarineEnergy.app_report-api_c8cce9a6_plumber.yml 
+    #   /share/user_reports/bdbest@gmail.com/MarineEnergy.app_report-api_c8cce9a6.html
+    system2("Rscript", "--vanilla", r_script, yml, out_file, wait = F)  
+  }
   
-  # TODO: handle refresh of same input args
-  if (!file.exists(out_file))
-    render(
-      input         = in_rmd, 
-      output_file   = out_file, 
-      output_format = out_format,
-      params = list(
-        title     = title,
-        receptors = receptors))
-  
-  stopifnot(file.exists(out_file))
-  
-  res$status <- 303 # redirect
-  res$setHeader("Location", out_url)
-  glue::glue(
-    "<html>
-    <head>
-      <meta http-equiv=\"Refresh\" content=\"0; url={out_url}\" />
-    </head>
-    <body>
-    </body>
-  </html>")
+  list(
+    url    = glue("{url_rpt_pfx}/{basename(out_file)}"),
+    status = ifelse(file.exists(out_file), "published", "submitted"),
+    params = m)
 }
 
 # /sum ----
