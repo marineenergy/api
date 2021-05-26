@@ -184,7 +184,8 @@ function(
   res) {
   # report = "report_22b870ca.html"
 
-  token_pw <- digest::digest(readLines("/share/.password_mhk-env.us"), algo="crc32")
+  pw <- readLines("/share/.password_mhk-env.us")
+  token_pw <- digest::digest(c(report, pw), algo="crc32")
   if (token != token_pw)
     return("Sorry, token failed -- not authorized!")
   
