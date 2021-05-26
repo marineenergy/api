@@ -5,7 +5,7 @@ params:
   Date: 2021-05-25 18:17:53 UTC
   Title: Test Report
   FileType: html
-  Content:
+  Contents:
     value:
       Projects: yes
       Management: yes

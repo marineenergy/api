@@ -4,34 +4,24 @@ if (!require(librarian)){
   library(librarian)
 }
 shelf(
-  dplyr, digest, fs, glue, here, highcharter, httr, purrr, rmarkdown, readr, 
+  dplyr, digest, fs, glue, here, highcharter, httr, jsonlite, purrr, rmarkdown, readr, 
   stringr, tibble, tidyr, yaml)
 source("/share/github/apps_dev/functions.R")
+# TODO: source() as needed /share/github/apps/scripts/db.R,common.R,shiny.R,report.R
+# TODO: prefix with pkg:: and skip loading whole library
+
+# paths ----
+dir_rpt_pfx <- "/share/user_reports"
+url_rpt_pfx <- "https://marineenergy.app/report"
+# sym link to share dir_rpt_fx to url_rpt_pfx:
+#   ln -s /share/user_reports /share/github/www/report
 
 # TODO: https://rviews.rstudio.com/2019/08/13/plumber-logging/
 
-# /highchart ----
-#' Plot the iris dataset using interactive chart
-#' 
-#' @param spec Species to filter
-#'
-#' @get /highchart
-#' @serializer htmlwidget
-function(spec){
-  library(highcharter)
-  
-  myData <- iris
-  title <- "All Species"
-  
-  # Filter if the species was specified
-  if (!missing(spec)){
-    title <- paste0("Only the '", spec, "' Species")
-    myData <- subset(iris, Species == spec)
-  }
-  
-  hchart(myData, "scatter", hcaes(x = Sepal.Length, y = Petal.Length, group = Species)) %>%
-    hc_title(text = title)
-}
+#* @apiTitle MarineEnergy.app API
+#* @apiDescription Application programming interface (API) for the Marine Energy Toolkit at MarineEnergy.app
+#* @apiVersion 0.1.9
+#* @apiContact Ben Best <ben@ecoquants.com>
 
 # /ferc_docs ----
 #' FERC docs in PRIMRE export metadata format
@@ -95,25 +85,8 @@ function(){
   docs
 }
 
-# /echo ----
-#* Echo back the input
-#* @param msg The message to echo
-#* @get /echo
-function(msg="") {
-  list(msg = paste0("The message is: '", msg, "'"))
-}
-
-# /plot ----
-#* Plot a histogram
-#* @serializer png
-#* @get /plot
-function() {
-  rand <- rnorm(100)
-  hist(rand)
-}
-
 # /report ----
-#* Submit report parameters for publishing
+#* Submit parameters to render a report
 #* @param email Email, e.g.: ben@ecoquants.com
 #* @param date Date, e.g.: 2021-05-25 14:39:21 UTC 
 #* @param title Title, e.g.: Test Report
@@ -123,21 +96,17 @@ function() {
 #* @get /report
 function(
   req,
-  email,
-  date,
-  title,
-  ext = "html",
-  content = NA,
-  interactions = NA,
+  email        = "bdbest@gmail.com",
+  date         = "2021-05-25 19:11:49 UTC",
+  title        = "Test Report",
+  ext          = "html",
+  contents     = '{"Projects":[true],"Management":[true]}',
+  interactions = '[["Receptor.Fish","Stressor.PhysicalInteraction.Collision"],["Technology.Wave","Receptor.Birds"]]',
   res) {
 
-  # paths
+  # paths, input
   in_rmd      <- "report-v2_template.Rmd"
   r_script    <- "/share/github/api/scripts/render_yml.R"
-  dir_rpt_pfx <- "/share/user_reports"
-  url_rpt_pfx <- "https://marineenergy.app/report/"
-  # sym link to share dir_rpt_fx to url_rpt_pfx:
-  #   ln -s /share/user_reports /share/github/www/report
   
   # metadata
   m <- list(
@@ -145,44 +114,93 @@ function(
     Date         = date,
     Title        = title,
     FileType     = ext,
-    Content      = fromJSON(content),
-    Interactions = fromJSON(interactions))
-  # ext = m$FileType; email = m$Email
+    Contents     = jsonlite::fromJSON(contents),
+    Interactions = jsonlite::fromJSON(interactions))
   
-  hash <- digest(m, algo="crc32")
-  yml <- glue("{dir_rpt_pfx}/{email}/MarineEnergy.app_report-api_{hash}_plumber.yml")
+  # paths, output
+  hsh <- digest::digest(m, algo="crc32")
+  yml <- glue::glue("{dir_rpt_pfx}/{email}/report_{hsh}.yml")
+  rpt <- fs::path_ext_set(yml, ext)
+  log <- fs::path_ext_set(yml, ".txt")
+  url <- stringr::str_replace(rpt, dir_rpt_pfx, url_rpt_pfx)
+  
   dir.create(dirname(yml), showWarnings = F)
-  write_yaml(m, yml)
+  yaml::write_yaml(m, yml)
 
-  out_file <- glue("{dir_rpt_pfx}/{email}/MarineEnergy.app_report-api_{hash}.{ext}")
-
-  browser()
-  if (!file.exists(out_file)){
-    message(glue("{yml} -> {out_file}"))
-    # /share/user_reports/bdbest@gmail.com/MarineEnergy.app_report-api_c8cce9a6_plumber.yml 
-    #   /share/user_reports/bdbest@gmail.com/MarineEnergy.app_report-api_c8cce9a6.html
-    system2("Rscript", "--vanilla", r_script, yml, out_file, wait = F)  
+  if (!file.exists(rpt)){
+    cmd <- glue::glue("{r_script} {yml} {rpt} > {log} 2>> {log}") # message(cmd)
+    system(cmd, wait = F)
   }
   
   list(
-    url    = glue("{url_rpt_pfx}/{basename(out_file)}"),
-    status = ifelse(file.exists(out_file), "published", "submitted"),
+    link   = url,
+    status = ifelse(file.exists(rpt), "published", "submitted"),
     params = m)
 }
 
-# /sum ----
-#* Return the sum of two numbers
-#* @param a The first number to add
-#* @param b The second number to add
-#* @post /sum
-function(a, b) {
-  as.numeric(a) + as.numeric(b)
+# /reports ----
+#* Get a user's list of reports, published and submitted
+#* @param email Email, e.g.: ben@ecoquants.com
+#* @get /user_reports
+#* @serializer csv
+function(
+  req,
+  email = "bdbest@gmail.com",
+  res) {
+
+  dir_rpts <- glue::glue("{dir_rpt_pfx}/{email}")
+  
+  d <- tibble(
+    yml = list.files(dir_rpts, "\\.yml", full.names = T)) %>% 
+    mutate(
+      m          = purrr::map(yml, yaml::read_yaml),
+      ext        = purrr::map_chr(m, "FileType"),
+      title      = purrr::map_chr(m, "Title"),
+      date       = purrr::map_chr(m, "Date"),
+      contents   = purrr::map_chr(m, function(m) names(m$Contents) %>% paste(collapse=",")),
+      n_ixns     = purrr::map_chr(m, function(m) length(m$Interactions)),
+      rpt        = fs::path_ext_set(yml, ext),
+      rpt_exists = file.exists(rpt),
+      status     = ifelse(rpt_exists, "published", "submitted"),
+      log        = fs::path_ext_set(yml, ".txt"),
+      url        = ifelse(rpt_exists, stringr::str_replace(rpt, dir_rpt_pfx, url_rpt_pfx), NA))
+  # TODO: for rpt_exists == F, search for error in log
+  
+  d %>% 
+    select(title, date, status, contents, n_ixns, url)
+}
+
+# /delete_report ----
+#* Delete a report. Requires a server-supplied token for authorization.
+#* @param email Email, e.g.: ben@ecoquants.com
+#* @param report 
+#* @get /user_reports
+#* @serializer csv
+function(
+  req,
+  email  = "bdbest@gmail.com",
+  report,
+  token,
+  res) {
+  # report = "report_22b870ca.html"
+
+  token_pw <- digest::digest(readLines("/share/.password_mhk-env.us"), algo="crc32")
+  if (token != token_pw)
+    return("Sorry, token failed -- not authorized!")
+  
+  rpt <- glue::glue("{dir_rpt_pfx}/{email}/{report}")
+  if (!file.exists(rpt))
+    return("Sorry, report not found!")
+  
+  rpt_files <- list.files(dirname(rpt), fs::path_ext_remove(basename(rpt)), full.names = T)
+  file.remove(rpt_files)
+  cat("SUCCESS! Report removed.")
 }
 
 # / ----
 #* redirect to the swagger interface 
 #* @get /
-#* @html
+#* @serializer html
 function(req, res) {
   res$status <- 303 # redirect
   res$setHeader("Location", "./__swagger__/")
