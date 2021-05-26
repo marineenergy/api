@@ -1,35 +1,16 @@
 ---
 title: "`r params$title`"
 params:
-  Email: bdbest@gmail.com
-  Date: 2021-05-25 18:17:53 UTC
-  Title: Test Report
-  FileType: html
-  Contents:
+  email: bdbest@gmail.com
+  date: 2021-05-26 08:57:39 UTC
+  title: for realz
+  filetype: html
+  contents:
     value:
-      Projects: yes
-      Management: yes
-  Interactions:
-    value:
-    - - Receptor.Fish
-      - Stressor.PhysicalInteraction.Collision
-    - - Technology.Wave
-      - Receptor.Birds
-# params: 
-#   title: "Kerry's NY/MA Home Tidal Zone"
-#   aoi_wkt: "POLYGON ((-72.33398 41.01307, -70.5542 43.96119, -65.78613 43.69171, -70.68604
-#     40.43022, -72.33398 41.01307))"
-#   technology: Current
-#   lit_queries:
-#   - Fish AND Collision AND Current
-#   - Fish AND Habitat Change AND Current
-#   spatial_receptors:
-#   - Fish
-#   - Fish
-#   lit_tethys: yes
-#   lit_ferc: null
-#   spatial: yes
-#   mgt_tethys: ~  
+      projects: yes
+      management: yes
+  interactions:
+    value: []
 output:
   html_document:
     toc: true

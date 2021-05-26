@@ -90,7 +90,7 @@ function(){
 #* @param email Email, e.g.: ben@ecoquants.com
 #* @param date Date, e.g.: 2021-05-25 14:39:21 UTC 
 #* @param title Title, e.g.: Test Report
-#* @param ext FileType (one of: html, pdf, docx), e.g.: html
+#* @param filetype FileType (one of: html, pdf, docx), e.g.: html
 #* @param contents Contents as JSON, e.g.: {"Projects":[true],"Management":[true]}
 #* @param interactions Interactions as JSON, e.g.: [["Receptor.Fish","Stressor.PhysicalInteraction.Collision"],["Technology.Wave","Receptor.Birds"]]
 #* @get /report
@@ -99,7 +99,7 @@ function(
   email        = "bdbest@gmail.com",
   date         = "2021-05-25 19:11:49 UTC",
   title        = "Test Report",
-  ext          = "html",
+  filetype     = "html",
   contents     = '{"Projects":[true],"Management":[true]}',
   interactions = '[["Receptor.Fish","Stressor.PhysicalInteraction.Collision"],["Technology.Wave","Receptor.Birds"]]',
   res) {
@@ -110,25 +110,31 @@ function(
   
   # metadata
   m <- list(
-    Email        = email,
-    Date         = date,
-    Title        = title,
-    FileType     = ext,
-    Contents     = jsonlite::fromJSON(contents),
-    Interactions = jsonlite::fromJSON(interactions))
+    email        = email,
+    date         = date,
+    title        = title,
+    filetype     = filetype,
+    contents     = jsonlite::fromJSON(contents),
+    interactions = jsonlite::fromJSON(interactions, simplifyMatrix=F))
+  
+  message("m")
+  print(m)
   
   # paths, output
   hsh <- digest::digest(m, algo="crc32")
   yml <- glue::glue("{dir_rpt_pfx}/{email}/report_{hsh}.yml")
-  rpt <- fs::path_ext_set(yml, ext)
+  rpt <- fs::path_ext_set(yml, m$filetype)
   log <- fs::path_ext_set(yml, ".txt")
   url <- stringr::str_replace(rpt, dir_rpt_pfx, url_rpt_pfx)
   
   dir.create(dirname(yml), showWarnings = F)
   yaml::write_yaml(m, yml)
+  
+  message(glue("yml exists {file.exists(yml)}: {yml}"))
 
   if (!file.exists(rpt)){
-    cmd <- glue::glue("{r_script} {yml} {rpt} > {log} 2>> {log}") # message(cmd)
+    cmd <- glue::glue("{r_script} {yml} {rpt} > {log} 2>> {log}")
+    message(cmd)
     system(cmd, wait = F)
   }
   
@@ -138,7 +144,7 @@ function(
     params = m)
 }
 
-# /reports ----
+# /user_reports ----
 #* Get a user's list of reports, published and submitted
 #* @param email Email, e.g.: ben@ecoquants.com
 #* @get /user_reports
@@ -154,18 +160,19 @@ function(
     yml = list.files(dir_rpts, "\\.yml", full.names = T)) %>% 
     mutate(
       m          = purrr::map(yml, yaml::read_yaml),
-      ext        = purrr::map_chr(m, "FileType"),
-      title      = purrr::map_chr(m, "Title"),
-      date       = purrr::map_chr(m, "Date"),
-      contents   = purrr::map_chr(m, function(m) names(m$Contents) %>% paste(collapse=",")),
-      n_ixns     = purrr::map_chr(m, function(m) length(m$Interactions)),
-      rpt        = fs::path_ext_set(yml, ext),
+      ext        = purrr::map_chr(m, "filetype"),
+      title      = purrr::map_chr(m, "title"),
+      date       = purrr::map_chr(m, "date"),
+      contents   = purrr::map_chr(m, function(m) names(m$contents) %>% paste(collapse=",")),
+      n_ixns     = purrr::map_chr(m, function(m) length(m$interactions)),
+      rpt        = purrr::map2_chr(yml, ext, fs::path_ext_set),
       rpt_exists = file.exists(rpt),
       status     = ifelse(rpt_exists, "published", "submitted"),
       log        = fs::path_ext_set(yml, ".txt"),
       url        = ifelse(rpt_exists, stringr::str_replace(rpt, dir_rpt_pfx, url_rpt_pfx), NA))
   # TODO: for rpt_exists == F, search for error in log
   
+  message("/user_reports")
   d %>% 
     select(title, date, status, contents, n_ixns, url)
 }
