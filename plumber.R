@@ -174,7 +174,7 @@ function(
 #* Delete a report. Requires a server-supplied token for authorization.
 #* @param email Email, e.g.: ben@ecoquants.com
 #* @param report 
-#* @get /user_reports
+#* @get /delete_report
 #* @serializer csv
 function(
   req,
