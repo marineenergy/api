@@ -154,6 +154,7 @@ function(
   email,
   res) {
 
+  # email = "bdbest@gmail.com"
   dir_rpts <- glue::glue("{dir_rpt_pfx}/{email}")
   
   d <- tibble(
@@ -163,16 +164,18 @@ function(
       ext        = purrr::map_chr(m, "filetype"),
       title      = purrr::map_chr(m, "title"),
       date       = purrr::map_chr(m, "date"),
-      contents   = purrr::map_chr(m, function(m) names(m$contents) %>% paste(collapse=",")),
-      # TODO: rm
+      contents   = purrr::map_chr(m, function(m) 
+        names(m$contents)[unlist(m$contents)] %>% 
+          paste(collapse=",")),
       n_ixns     = purrr::map_chr(m, function(m) length(m$interactions)),
       rpt        = purrr::map2_chr(yml, ext, fs::path_ext_set),
       rpt_exists = file.exists(rpt),
       status     = ifelse(rpt_exists, "published", "submitted"),
       log        = fs::path_ext_set(yml, ".txt"),
-      url        = ifelse(rpt_exists, stringr::str_replace(rpt, dir_rpt_pfx, url_rpt_pfx), NA))
+      url        = ifelse(rpt_exists, stringr::str_replace(rpt, dir_rpt_pfx, url_rpt_pfx), NA)) %>% 
+    arrange(desc(date))
   # TODO: for rpt_exists == F, search for error in log
-  
+
   #message("/user_reports")
   d %>% 
     select(title, date, status, contents, n_ixns, url)

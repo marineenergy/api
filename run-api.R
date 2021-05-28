@@ -13,9 +13,8 @@ pr(plumber_r) %>%
 # sudo -u shiny pm2 list
 # sudo -u shiny pm2 save
 
-# open in web browser: http://api.marineenergy.api
-# for more, see https://www.rplumber.io/docs
+# open in web browser: http://api.marineenergy.app
+# for more, see https://rplumber.io
 
-## Reference
-#  - https://www.rplumber.io/articles/hosting.html#wrap-your-plumber-file
-#  - custom serializer: https://github.com/rstudio/plumber/issues/344#issuecomment-439492586
+# Reference:
+#  - https://www.rplumber.io/articles/hosting.html#pm2-1
