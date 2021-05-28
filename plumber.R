@@ -151,19 +151,20 @@ function(
 #* @serializer csv
 function(
   req,
-  email = "bdbest@gmail.com",
+  email,
   res) {
 
   dir_rpts <- glue::glue("{dir_rpt_pfx}/{email}")
   
   d <- tibble(
-    yml = list.files(dir_rpts, "\\.yml", full.names = T)) %>% 
+    yml = list.files(dir_rpts, "^report_.*\\.yml", full.names = T)) %>% 
     mutate(
       m          = purrr::map(yml, yaml::read_yaml),
       ext        = purrr::map_chr(m, "filetype"),
       title      = purrr::map_chr(m, "title"),
       date       = purrr::map_chr(m, "date"),
       contents   = purrr::map_chr(m, function(m) names(m$contents) %>% paste(collapse=",")),
+      # TODO: rm
       n_ixns     = purrr::map_chr(m, function(m) length(m$interactions)),
       rpt        = purrr::map2_chr(yml, ext, fs::path_ext_set),
       rpt_exists = file.exists(rpt),
@@ -172,9 +173,28 @@ function(
       url        = ifelse(rpt_exists, stringr::str_replace(rpt, dir_rpt_pfx, url_rpt_pfx), NA))
   # TODO: for rpt_exists == F, search for error in log
   
-  message("/user_reports")
+  #message("/user_reports")
   d %>% 
     select(title, date, status, contents, n_ixns, url)
+}
+
+# /user_reports_last_modified ----
+#* Get timestap for last modified from user's list of reports, published and submitted
+#* @param email Email, e.g.: ben@ecoquants.com
+#* @get /user_reports_last_modified
+#* @serializer text
+function(
+  req,
+  email,
+  res) {
+  
+  dir_rpts <- glue::glue("{dir_rpt_pfx}/{email}")
+  
+  list.files(dir_rpts, "^report_.*", full.names = T) %>% 
+    fs::file_info() %>% 
+    summarize(
+      last_mod = max(modification_time)) %>% 
+    pull(last_mod)
 }
 
 # /delete_report ----
@@ -185,7 +205,7 @@ function(
 #* @serializer csv
 function(
   req,
-  email  = "bdbest@gmail.com",
+  email,
   report,
   token,
   res) {
