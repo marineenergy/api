@@ -181,7 +181,7 @@ function(
     select(title, date, status, contents, n_ixns, url)
 }
 
-# /user_reports_last_modified ----
+# /user_reports_hash_modified ----
 #* Get timestap for last modified from user's list of reports, published and submitted
 #* @param email Email, e.g.: ben@ecoquants.com
 #* @get /user_reports_last_modified
@@ -190,14 +190,18 @@ function(
   req,
   email,
   res) {
+  # email = "bdbest@gmail.com"
   
   dir_rpts <- glue::glue("{dir_rpt_pfx}/{email}")
   
   list.files(dir_rpts, "^report_.*", full.names = T) %>% 
     fs::file_info() %>% 
-    summarize(
-      last_mod = max(modification_time)) %>% 
-    pull(last_mod)
+    # summarize(
+    #   last_mod = max(modification_time)) %>% 
+    mutate(
+      b = basename(path)) %>% 
+    select(b, modification_time) %>% 
+    digest::digest(algo="crc32")
 }
 
 # /delete_report ----
@@ -205,7 +209,7 @@ function(
 #* @param email Email, e.g.: ben@ecoquants.com
 #* @param report 
 #* @get /delete_report
-#* @serializer csv
+#* @serializer text
 function(
   req,
   email,
@@ -214,14 +218,23 @@ function(
   res) {
   # report = "report_22b870ca.html"
 
+  # email = "bdbest@gmail.com"; report = "report_cef7d716.docx"
+  # token <- digest::digest(c(report, pw), algo="crc32")
+  # # shiny token: 4299c7fb
+  # 
+  # r <- httr::GET(
+  #   "https://api.marineenergy.app/user_reports_last_modified", 
+  #   query = list(email=email, report=rpt, token=tkn))
+  
+  # email = "bdbest@gmail.com"; report = "report_471f1593.html"; token = "aaaae249"
   pw <- readLines("/share/.password_mhk-env.us")
   token_pw <- digest::digest(c(report, pw), algo="crc32")
   if (token != token_pw)
-    return("Sorry, token failed -- not authorized!")
+    stop("Sorry, token failed -- not authorized!")
   
   rpt <- glue::glue("{dir_rpt_pfx}/{email}/{report}")
   if (!file.exists(rpt))
-    return("Sorry, report not found!")
+    stop("Sorry, report not found!")
   
   rpt_files <- list.files(dirname(rpt), fs::path_ext_remove(basename(rpt)), full.names = T)
   file.remove(rpt_files)

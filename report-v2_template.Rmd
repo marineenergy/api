@@ -42,13 +42,29 @@ knitr::opts_chunk$set(echo = F, warning = F, message = F, eval = T)
 ```
 
 ```{r init}
-source("/share/github/apps_dev/functions.R") # libraries, db connection object (con)
+source("/share/github/apps_dev/scripts/db.R") # libraries, db connection object (con)
 #rmd_params <- readRDS(here("data/tmp_rmd_params.rds"))
+
+
+markdown::markdownToHTML()
 ```
 
-# Configuration
+## Configuration
 
 ```{r, comment=""}
 list(params) %>% as.yaml() %>% cat()
+```
+
+## Management
+
+```{r}
+rowids <- sapply(values$ixns, get_rowids_with_ixn, db_tbl = "tethys_mgt_tags") %>% 
+  unlist() %>% unique()
+d <- d_mgt %>%
+  filter(rowid %in% !!rowids)
+}
+d %>% 
+select(-rowid) %>% 
+collect()
 ```
 
