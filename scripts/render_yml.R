@@ -22,6 +22,8 @@ if (!length(args) %in% 1:2) {
   in_yml <- args[1]
 }
 
+if (length(args) ==2)
+
 stopifnot(file.exists(in_yml))
 
 # paths
@@ -42,6 +44,7 @@ if (length(args) == 2){
 } else {
   out_file <- fs::path_ext_set(in_yml, glue::glue(".{m$filetype}"))
 }
+message(glue::glue("out_file: {out_file}"))
 
 # params for Rmd
 p <- m
@@ -58,7 +61,7 @@ out_fmt <- c(
 
 message("rendering...")
 if (!file.exists(out_file))
-  render(
+  rmarkdown::render(
     input         = in_rmd,
     output_file   = out_file,
     output_format = out_fmt,
