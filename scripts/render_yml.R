@@ -2,7 +2,7 @@
 
 # chmod g+x /share/github/api/scripts/render_yml.R
 
-# yml="/share/user_reports/ben@ecoquants.com/report_51e8b60a.yml"
+# yml="/share/user_reports/ben@ecoquants.com/report_8ef2bf87.yml"
 
 # args ----
 args   <- commandArgs(trailingOnly=T)
@@ -12,12 +12,12 @@ if (length(args) != 1) {
 yml <- args[1]
 stopifnot(file.exists(yml))
 
-message("yml: {yml}")
-
 setwd("/share/github/api")
 template_rmd <- "/share/github/api/_report.Rmd"
 source("/share/github/apps_dev/scripts/common.R")
 source(file.path(dir_scripts, "report.R"))
+
+message(glue("yml: {yml}"))
 
 # librarian::shelf(
 #   dplyr, fs, rmarkdown, yaml)
@@ -41,6 +41,15 @@ idx <- lns %>%
   which() %>% 
   .[2] + 1
 fm$params <- yaml2params(yml, frontmatter = T)
+
+out_fmt = c(
+  html = "html_document",
+  pdf  = "pdf_document",
+  docx = "word_document")[p$filetype]
+fm$output <- fm$output[out_fmt]
+
+message("frontmatter for Rmd... ----")
+message(yaml::as.yaml(fm))
 
 write("---", rmd)
 write(yaml::as.yaml(fm), rmd, append = T)

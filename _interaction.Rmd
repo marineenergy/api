@@ -1,7 +1,10 @@
 
 ## `r paste(params$interactions[[{{i_ixn}}]], collapse = ', ')`
 
-```{r}
+```{r, results='asis'}
+cntnt      <- "{{cntnt}}"
+caption_md <- "{{caption_md}}"
+
 get_tbl_ixn("{{db_tbl}}", params$interactions[[{{i_ixn}}]]) %>% 
-  DT::datatable()
+  rpt_tbl(cntnt, caption_md)
 ```
