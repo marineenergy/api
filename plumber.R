@@ -4,7 +4,7 @@ if (!require(librarian)){
   library(librarian)
 }
 shelf(
-  dplyr, digest, fs, glue, here, highcharter, httr, jsonlite, purrr, rmarkdown, readr, 
+  dplyr, digest, fs, glue, here, httr, jsonlite, purrr, rmarkdown, readr, 
   stringr, tibble, tidyr, yaml)
 
 #source("/share/github/apps_dev/functions.R")
@@ -182,7 +182,7 @@ function(
       rpt_exists = file.exists(rpt),
       status     = ifelse(rpt_exists, "published", "submitted"),
       log        = fs::path_ext_set(yml, ".txt"),
-      url        = ifelse(rpt_exists, stringr::str_replace(rpt, dir_rpt_pfx, url_rpt_pfx), NA)) %>% 
+      url        = stringr::str_replace(rpt, dir_rpt_pfx, url_rpt_pfx)) %>% 
     arrange(desc(date))
   # TODO: for rpt_exists == F, search for error in log
 
@@ -237,16 +237,17 @@ function(
   #   query = list(email=email, report=rpt, token=tkn))
   
   # email = "bdbest@gmail.com"; report = "report_471f1593.html"; token = "aaaae249"
+  # email = "ben@ecoquants.com"; report = "report_58fd717d.docx"
   pw <- readLines("/share/.password_mhk-env.us")
   token_pw <- digest::digest(c(report, pw), algo="crc32")
   if (token != token_pw)
     stop("Sorry, token failed -- not authorized!")
   
-  rpt <- glue::glue("{dir_rpt_pfx}/{email}/{report}")
-  if (!file.exists(rpt))
+  yml <- glue::glue("{dir_rpt_pfx}/{email}/{fs::path_ext_set(report, '.yml')}")
+  if (!file.exists(yml))
     stop("Sorry, report not found!")
   
-  rpt_files <- list.files(dirname(rpt), fs::path_ext_remove(basename(rpt)), full.names = T)
+  rpt_files <- list.files(dirname(yml), fs::path_ext_remove(basename(yml)), full.names = T)
   file.remove(rpt_files)
   cat("SUCCESS! Report removed.")
 }
