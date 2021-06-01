@@ -6,7 +6,10 @@ if (!require(librarian)){
 shelf(
   dplyr, digest, fs, glue, here, highcharter, httr, jsonlite, purrr, rmarkdown, readr, 
   stringr, tibble, tidyr, yaml)
-source("/share/github/apps_dev/functions.R")
+
+#source("/share/github/apps_dev/functions.R")
+source("/share/github/apps_dev/scripts/common.R")
+source("/share/github/apps_dev/scripts/db.R")
 # TODO: source() as needed /share/github/apps/scripts/db.R,common.R,shiny.R,report.R
 # TODO: prefix with pkg:: and skip loading whole library
 
@@ -105,7 +108,7 @@ function(
   res) {
 
   # paths, input
-  in_rmd      <- "report-v2_template.Rmd"
+  # in_rmd      <- "report-v2_template.Rmd"
   r_script    <- "/share/github/api/scripts/render_yml.R"
   
   # metadata
@@ -133,8 +136,14 @@ function(
   message(glue("yml exists {file.exists(yml)}: {yml}"))
 
   if (!file.exists(rpt)){
-    cmd <- glue::glue("{r_script} {yml} {rpt} > {log} 2>> {log}")
+    # cmd <- glue::glue("{r_script} {yml} > {log} 2>> {log}")
+    # r_script="/share/github/api/scripts/render_yml.R"
+    # yml="/share/user_reports/ben@ecoquants.com/report_51e8b60a.yml"
+    # log="/share/user_reports/ben@ecoquants.com/report_51e8b60a.txt"
+    cmd <- glue::glue('r_script={r_script}\n yml={yml}\n log={log}\n $r_script $yml > $log 2>> $log')
+    # cat(cmd)
     message(cmd)
+    # system(cmd)
     system(cmd, wait = F)
   }
   
@@ -166,7 +175,8 @@ function(
       date       = purrr::map_chr(m, "date"),
       contents   = purrr::map_chr(m, function(m) 
         names(m$contents)[unlist(m$contents)] %>% 
-          paste(collapse=",")),
+          stringr::str_to_title() %>% 
+          paste(collapse=", ")),
       n_ixns     = purrr::map_chr(m, function(m) length(m$interactions)),
       rpt        = purrr::map2_chr(yml, ext, fs::path_ext_set),
       rpt_exists = file.exists(rpt),

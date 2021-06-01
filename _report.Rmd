@@ -49,8 +49,6 @@ source("/share/github/apps_dev/scripts/common.R")
 source(file.path(dir_scripts, "db.R"))
 source(file.path(dir_scripts, "shiny_report.R"))
 source(file.path(dir_scripts, "report.R"))
-
-library(knitr)
 ```
 
 # Configuration
@@ -58,44 +56,3 @@ library(knitr)
 ```{r, comment=""}
 list(params) %>% yaml::as.yaml() %>% cat()
 ```
-
-```{r, results='asis'}
-
-# yml="/share/user_reports/ben@ecoquants.com/report_51e8b60a.yml"; params=yaml2params(yml)
-# ixn    <- params$interactions[[1]]
-# db_tbl <- "tethys_mgt"
-
-contents <- names(params$contents)[unlist(params$contents)]
-
-# stringr::str_to_title() %>% 
-# paste(collapse=", ")
-
-# rpt_inxn <- function(ixn, db_tbl){
-#   glue("## {paste(ixn, collapse = ', ')}")
-#   
-#   get_tbl_ixn(db_tbl, ixn) %>% 
-#     DT::datatable()
-# }
-# rpt_inxn(db_tbl, ixn)
-
-rpt_content <- function(cntnt, ixns){
-  # cntnt = contents[1]; ixns = params$interactions
-
-  db_tbl <- cntnt2tbl <- c(
-    management = "tethys_mgt")[[cntnt]]
-
-  list(
-    glue("# {stringr::str_to_title(cntnt)}")) %>% 
-  append(
-    lapply(
-      1:length(ixns), 
-      function(i_ixn){ 
-        knit_expand('_cntnt_ixn.Rmd') })) %>% 
-    knit_child(text = unlist(.), quiet = T) %>% 
-    paste(sep = '\n\n')
-}
-#cntnt = contents[1]
-rpt_content(contents[1], params$interactions)
-#knitr::knit_expand('_cntnt.Rmd')
-```
-

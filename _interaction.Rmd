@@ -1,0 +1,7 @@
+
+## `r paste(params$interactions[[{{i_ixn}}]], collapse = ', ')`
+
+```{r}
+get_tbl_ixn("{{db_tbl}}", params$interactions[[{{i_ixn}}]]) %>% 
+  DT::datatable()
+```

@@ -1,68 +1,67 @@
 #!/usr/local/bin/Rscript --vanilla
 
-# chmod a+x /share/github/api/scripts/render_yml.R
+# chmod g+x /share/github/api/scripts/render_yml.R
 
-# rndr=/share/github/api/scripts/render_yml.R
-# yml=/share/user_reports/bdbest@gmail.com/report_8953190e.yml
-# $rndr $yml
-# pandoc: /share/user_reports/bdbest@gmail.com/report_8953190e.tex: openFile: permission denied (Permission denied)
-# -rw-rw-r-- 1 root  root    2994 May 28 19:27 report_8953190e.tex
-# -rw-rw-r-- 1 root  root    3680 May 28 19:27 report_8953190e.txt
-# sudo chmod 775 *
-# sudo chgrp staff *
-# TODO: run plumber API as user shiny
+# yml="/share/user_reports/ben@ecoquants.com/report_51e8b60a.yml"
 
-# arguments
-args = commandArgs(trailingOnly=TRUE)
-message("args...")
-print(args)
-if (!length(args) %in% 1:2) {
-  stop("One to two arguments must be supplied: input_yml, output_file.", call.=FALSE)
-} else {
-  in_yml <- args[1]
+# args ----
+args   <- commandArgs(trailingOnly=T)
+if (length(args) != 1) {
+  stop("Only 1 required argument missing: yml", call.=FALSE)
 }
+yml <- args[1]
+stopifnot(file.exists(yml))
 
-if (length(args) ==2)
+message("yml: {yml}")
 
-stopifnot(file.exists(in_yml))
+setwd("/share/github/api")
+template_rmd <- "/share/github/api/_report.Rmd"
+source("/share/github/apps_dev/scripts/common.R")
+source(file.path(dir_scripts, "report.R"))
 
-# paths
-in_rmd <- "/share/github/api/report-v2_template.Rmd"
-stopifnot(file.exists(in_rmd))
+# librarian::shelf(
+#   dplyr, fs, rmarkdown, yaml)
 
-librarian::shelf(
-  dplyr, rmarkdown, yaml)
+# params ----
+p <- yaml2params(yml, frontmatter = F)
 
-# metadata
-# readLines(in_yml) %>% paste(collapse="\n") %>% cat()
-# in_yml   <- "/share/user_reports/bdbest@gmail.com/report_c917e20c.yml"
+message("params for Rmd... ----")
+message(yaml::as.yaml(p))
 
-m <- read_yaml(in_yml)
+# paths ----
+rmd <- fs::path_ext_set(yml, ".Rmd")
+out <- fs::path_ext_set(yml, glue::glue(".{p$filetype}"))
+message(glue::glue("rmd: {rmd}\nout: {out}"))
 
-if (length(args) == 2){
-  out_file <- args[2]
-} else {
-  out_file <- fs::path_ext_set(in_yml, glue::glue(".{m$filetype}"))
-}
-message(glue::glue("out_file: {out_file}"))
+# write template with params ----
+lns <- readLines(template_rmd)
+fm  <- rmarkdown::yaml_front_matter(template_rmd)
+idx <- lns %>% 
+  grepl(pattern = "---") %>% 
+  which() %>% 
+  .[2] + 1
+fm$params <- yaml2params(yml, frontmatter = T)
 
-# params for Rmd
-p <- m
-p$contents     <- list(value = p$contents)
-p$interactions <- list(value = p$interactions)
+write("---", rmd)
+write(yaml::as.yaml(fm), rmd, append = T)
+write("---", rmd, append = T)
+write(lns[idx:length(lns)], rmd, append = T)
 
-message("params for Rmd...")
-as.yaml(p) %>% cat()
+# write contents with interactions ----
+contents <- names(p$contents)[unlist(p$contents)]
 
-out_fmt <- c(
-  "html" = "html_document",
-  "pdf"  = "pdf_document",
-  "docx" = "word_document")[[m$filetype]]
+#cntnt = contents[1]
+r <- lapply(contents, rpt_content, ixns = p$interactions, rmd = rmd)
 
-message("rendering...")
-if (!file.exists(out_file))
-  rmarkdown::render(
-    input         = in_rmd,
-    output_file   = out_file,
-    output_format = out_fmt,
-    params        = p)
+# rpt_content(contents[1], T)
+#knitr::knit_expand('_cntnt.Rmd')
+
+# message("rendering...")
+# if (!file.exists(out))
+rmarkdown::render(
+  input         = rmd,
+  output_file   = out)
+    # output_format = c(
+    #   "html" = "html_document",
+    #   "pdf"  = "pdf_document",
+    #   "docx" = "word_document")[[p$filetype]])
