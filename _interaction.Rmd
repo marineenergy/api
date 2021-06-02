@@ -1,5 +1,5 @@
 
-## `r paste(params$interactions[[{{i_ixn}}]], collapse = ', ')`
+## `r ixn_to_colorhtml(params$interactions[[{{i_ixn}}]], df_tags)`
 
 ```{r, results='asis'}
 cntnt      <- "{{cntnt}}"

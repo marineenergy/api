@@ -24,6 +24,7 @@ output:
     toc_float: true
     number_sections: true
     mathjax: null
+    css: "/share/github/apps_dev/report-v2/www/styles.css"
   pdf_document:
     toc: true
     toc_depth: 4
@@ -49,6 +50,7 @@ source("/share/github/apps_dev/scripts/common.R")
 source(file.path(dir_scripts, "db.R"))
 source(file.path(dir_scripts, "shiny_report.R"))
 source(file.path(dir_scripts, "report.R"))
+df_tags <- get_tags()
 ```
 
 # Configuration
