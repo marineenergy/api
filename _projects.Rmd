@@ -1,0 +1,16 @@
+
+# Projects
+
+## Map
+
+```{r}
+load_projects()
+map_projects(prj_sites)
+```
+
+## Timeline
+
+```{r}
+plot_projects()
+```
+

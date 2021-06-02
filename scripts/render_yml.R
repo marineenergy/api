@@ -2,7 +2,7 @@
 
 # chmod g+x /share/github/api/scripts/render_yml.R
 
-# yml="/share/user_reports/ben@ecoquants.com/report_8ef2bf87.yml"
+# yml="/share/user_reports/ben@ecoquants.com/report_6c144302.yml"
 
 # args ----
 args   <- commandArgs(trailingOnly=T)
@@ -60,6 +60,7 @@ write(lns[idx:length(lns)], rmd, append = T)
 contents <- names(p$contents)[unlist(p$contents)]
 
 #cntnt = contents[1]
+# source(file.path(dir_scripts, "report.R"))
 r <- lapply(contents, rpt_content, ixns = p$interactions, rmd = rmd)
 
 # rpt_content(contents[1], T)
