@@ -41,6 +41,13 @@ editor_options:
 always_allow_html: true # install.packages("webshot"); webshot::install_phantomjs()
 ---
 
+```{css, echo=F}
+/* make room for ixn_to_colorhtml() */
+.h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
+  line-height: 1.5;
+}
+```
+
 ```{r setup, include=F}
 knitr::opts_chunk$set(echo = F, warning = F, message = F, eval = T)
 ```
