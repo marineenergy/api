@@ -8,8 +8,8 @@ shelf(
   stringr, tibble, tidyr, yaml)
 
 #source("/share/github/apps_dev/functions.R")
-source("/share/github/apps_dev/scripts/common.R")
-source("/share/github/apps_dev/scripts/db.R")
+source("/share/github/apps/scripts/common_2.R")
+source("/share/github/apps/scripts/db.R")
 # TODO: source() as needed /share/github/apps/scripts/db.R,common.R,shiny.R,report.R
 # TODO: prefix with pkg:: and skip loading whole library
 

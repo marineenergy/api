@@ -24,5 +24,7 @@ pr(plumber_r) %>%
 # open in web browser: http://api.marineenergy.app
 # for more, see https://rplumber.io
 
-# Reference:
+# Reference for setup:
 #  - https://www.rplumber.io/articles/hosting.html#pm2-1
+#    sudo -u shiny pm2 start --interpreter="Rscript" --image-name="run-api" /share/github/api/run-api.R
+#    sudo -u shiny pm2 save
