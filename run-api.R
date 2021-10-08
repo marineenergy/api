@@ -26,5 +26,12 @@ pr(plumber_r) %>%
 
 # Reference for setup:
 #  - https://www.rplumber.io/articles/hosting.html#pm2-1
-#    sudo -u shiny pm2 start --interpreter="Rscript" --image-name="run-api" /share/github/api/run-api.R
-#    sudo -u shiny pm2 save
+# # Install pm2
+# sudo apt-get update
+# sudo apt-get install nodejs npm
+# sudo npm install -g pm2
+# sudo pm2 startup
+# # introduce api.marineenergy.org service
+# sudo -u shiny pm2 start --interpreter="Rscript" --image-name="run-api" /share/github/api/run-api.R
+# sudo -u shiny pm2 save
+# # TODO: get service to auto restart on boot, probably only as user root (vs user shiny)
