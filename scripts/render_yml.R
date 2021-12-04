@@ -2,14 +2,13 @@
 
 # chmod g+x /share/github/api/scripts/render_yml.R
 
-# yml="/share/user_reports/ben@ecoquants.com/report_6c144302.yml"
-
 # args ----
 args   <- commandArgs(trailingOnly=T)
 if (length(args) != 1) {
   stop("Only 1 required argument missing: yml", call.=FALSE)
 }
 yml <- args[1]
+# yml="/share/user_reports/ben@ecoquants.com/report__test.yml"
 stopifnot(file.exists(yml))
 
 setwd("/share/github/api")
@@ -61,7 +60,18 @@ contents <- names(p$contents)[unlist(p$contents)]
 
 #cntnt = contents[1]
 # source(file.path(dir_scripts, "report.R"))
-r <- lapply(contents, rpt_content, ixns = p$interactions, rmd = rmd)
+
+if (length(p$interactions) == 0) {
+  # source global.R to get d_docs, d_pubs, ...
+  #writeLines('\n```{r}\nsource("/share/github/apps/report-v2/global.R")\n```\n\n', con = rmd) 
+  # TODO: return table of all content (do not filter by ixn) WITH the tags like in the app
+  r <- lapply(contents, rpt_content_noixns, rmd = rmd)
+} else {
+  # carry on as originally designed
+  r <- lapply(contents, rpt_content, ixns = p$interactions, rmd = rmd)
+}
+
+
 
 # rpt_content(contents[1], T)
 #knitr::knit_expand('_cntnt.Rmd')

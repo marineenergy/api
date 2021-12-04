@@ -1,0 +1,12 @@
+
+## `r ixn_to_colorhtml(params$interactions[[{{i_ixn}}]], df_tags)`
+
+```{r, results='asis'}
+cntnt      <- "{{cntnt}}"
+caption_md <- "{{caption_md}}"
+
+#get_tbl_ixn("{{db_tbl}}", params$interactions[[{{i_ixn}}]]) %>% 
+# TODO: add cks into yml config
+get_docs_tbl(d_docs, ixns = NULL, cks = NULL) %>% 
+  rpt_tbl(cntnt, caption_md)
+```

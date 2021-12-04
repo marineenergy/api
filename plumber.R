@@ -99,26 +99,31 @@ function(){
 #* @get /report
 function(
   req,
-  email        = "bdbest@gmail.com",
-  date         = "2021-05-25 19:11:49 UTC",
-  title        = "Test Report",
-  filetype     = "html",
-  contents     = '{"Projects":[true],"Management":[true]}',
-  interactions = '[["Receptor.Fish","Stressor.PhysicalInteraction.Collision"],["Technology.Wave","Receptor.Birds"]]',
+  email           = "bdbest@gmail.com",
+  date            = "2021-05-25 19:11:49 UTC",
+  title           = "Test Report",
+  filetype        = "html",
+  contents        = '{"Projects":[true],"Management":[true]}',
+  interactions    = '[["Receptor.Fish","Stressor.PhysicalInteraction.Collision"],["Technology.Wave","Receptor.Birds"]]',
+  document_checks = '[]',
+  spatial_aoi_wkt = '',
   res) {
 
   # paths, input
   # in_rmd      <- "report-v2_template.Rmd"
   r_script    <- "/share/github/api/scripts/render_yml.R"
   
+  browser()
   # metadata
   m <- list(
-    email        = email,
-    date         = date,
-    title        = title,
-    filetype     = filetype,
-    contents     = jsonlite::fromJSON(contents),
-    interactions = jsonlite::fromJSON(interactions, simplifyMatrix=F))
+    email           = email,
+    date            = date,
+    title           = title,
+    filetype        = filetype,
+    contents        = jsonlite::fromJSON(contents),
+    interactions    = jsonlite::fromJSON(interactions, simplifyMatrix=F),
+    document_checks = jsonlite::fromJSON(document_checks),
+    spatial_aoi_wkt = spatial_aoi_wkt)
   
   message("m")
   print(m)
