@@ -207,8 +207,9 @@ yaml2params <- function(yml, frontmatter=F){
   p <- yaml::read_yaml(yml)
   if (frontmatter){
     # directly writing into frontmatter of Rmd requires extra `value` for list objects
-    p$contents     <- list(value = p$contents)
-    p$interactions <- list(value = p$interactions)
+    p$contents        <- list(value = p$contents)
+    p$interactions    <- list(value = p$interactions)
+    p$document_checks <- list(value = p$document_checks)
   }
   p
 }

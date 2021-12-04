@@ -122,7 +122,7 @@ function(
     filetype        = filetype,
     contents        = jsonlite::fromJSON(contents),
     interactions    = jsonlite::fromJSON(interactions, simplifyMatrix=F),
-    document_checks = jsonlite::fromJSON(document_checks),
+    document_checks = jsonlite::fromJSON(document_checks, simplifyMatrix=F),
     spatial_aoi_wkt = spatial_aoi_wkt)
   
   message("m")
@@ -138,7 +138,7 @@ function(
   dir.create(dirname(yml), showWarnings = F)
   yaml::write_yaml(m, yml)
   
-  message(glue("yml exists {file.exists(yml)}: {yml}"))
+  #message(glue("yml exists {file.exists(yml)}: {yml}"))
 
   if (!file.exists(rpt)){
     # cmd <- glue::glue("{r_script} {yml} > {log} 2>> {log}")

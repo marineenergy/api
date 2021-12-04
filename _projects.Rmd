@@ -4,13 +4,16 @@
 ## Map
 
 ```{r}
-load_projects()
-map_projects(prj_sites)
+# params <- knitr::knit_params(readLines("/share/user_reports/ben@ecoquants.com/report_08affc8d_prj.Rmd"))
+# params$interactions <- params$interactions$value # if interactive
+tbl_projects <- get_projects_tbl(d_projects_tags, ixns = params$interactions)
+#table(tbl_projects$tag_technology)
+map_projects(tbl_projects)
 ```
 
 ## Timeline
 
 ```{r}
-plot_projects()
+plot_project_timelines(tbl_projects)
 ```
 

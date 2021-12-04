@@ -9,17 +9,17 @@ if (length(args) != 1) {
 }
 yml <- args[1]
 # yml="/share/user_reports/ben@ecoquants.com/report__test.yml"
+# yml="/share/user_reports/ben@ecoquants.com/report_88543ffb.yml"
+# yml="/share/user_reports/ben@ecoquants.com/report_0522bbdd.yml"
+# yml="/share/user_reports/ben@ecoquants.com/report_54759a5a.yml"
 stopifnot(file.exists(yml))
 
 setwd("/share/github/api")
 template_rmd <- "/share/github/api/_report.Rmd"
 source("/share/github/apps_dev/scripts/common.R")
-source(file.path(dir_scripts, "report.R"))
+source(here("scripts/report.R"))
 
 message(glue("yml: {yml}"))
-
-# librarian::shelf(
-#   dplyr, fs, rmarkdown, yaml)
 
 # params ----
 p <- yaml2params(yml, frontmatter = F)
@@ -71,17 +71,6 @@ if (length(p$interactions) == 0) {
   r <- lapply(contents, rpt_content, ixns = p$interactions, rmd = rmd)
 }
 
-
-
-# rpt_content(contents[1], T)
-#knitr::knit_expand('_cntnt.Rmd')
-
-# message("rendering...")
-# if (!file.exists(out))
 rmarkdown::render(
   input         = rmd,
   output_file   = out)
-    # output_format = c(
-    #   "html" = "html_document",
-    #   "pdf"  = "pdf_document",
-    #   "docx" = "word_document")[[p$filetype]])

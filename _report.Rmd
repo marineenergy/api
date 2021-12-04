@@ -1,5 +1,6 @@
 ---
-title: "`r params$title`"
+title: >
+  `r params$title`
 params:
   email: bdbest@gmail.com
   date: 2021-05-26 08:57:39 UTC
@@ -11,12 +12,16 @@ params:
       management: yes
   interactions:
     value:
-    - - Receptor.MarineMammals
-      - Stressor.Noise
-      - Technology.Wave
     - - Receptor.Fish
       - Stressor.PhysicalInteraction.Collision
       - Technology.Wave
+    - - Receptor.MarineMammals
+      - Stressor.Noise
+      - Technology.Wave
+  document_checks:
+    value:
+    - ck_ixn
+    - ck_mp
 output:
   html_document:
     toc: true
@@ -50,14 +55,15 @@ always_allow_html: true # install.packages("webshot"); webshot::install_phantomj
 
 ```{r setup, include=F}
 knitr::opts_chunk$set(echo = F, warning = F, message = F, eval = T)
+# params <- knitr::knit_params(readLines("/share/user_reports/ben@ecoquants.com/report_08affc8d_prj.Rmd"))
 ```
 
 ```{r init}
 source("/share/github/apps_dev/scripts/common.R")
 source(file.path(dir_scripts, "db.R"))
 source(file.path(dir_scripts, "shiny_report.R"))
-source(file.path(dir_scripts, "report.R"))
-df_tags <- get_tags()
+source("/share/github/api/scripts/report.R")
+#df_tags <- get_tags()
 ```
 
 # Configuration
