@@ -1,0 +1,11 @@
+
+## `r ixn_to_colorhtml(params$interactions[[{{i_ixn}}]], df_tags)`
+
+```{r}
+tbl_docs <- get_docs_tbl(
+  d_docs_tags, params$interactions[{{i_ixn}}], params$document_checks)
+
+datatable(
+  tbl_docs, 
+  escape = F, rownames = F)
+```

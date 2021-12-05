@@ -1,0 +1,16 @@
+
+## `r ixn_to_colorhtml(params$interactions[[{{i_ixn}}]], df_tags)`
+
+```{r}
+tbl_spatial <- get_spatial_tbl(
+  d_spatial_tags, 
+  ixns    = params$interactions[{{i_ixn}}], 
+  aoi_wkt = sf_to_wkt(params$spatial_aoi_wkt)) %>% 
+  mutate(
+    `Rows in Results` = map_int(sp_data, nrow)) %>% 
+  select(ID, Title, Tags, `Rows in Results`) # , sp_data)
+
+datatable(
+  tbl_spatial, 
+  escape = F, rownames = F)
+```

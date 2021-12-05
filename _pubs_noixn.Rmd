@@ -1,0 +1,13 @@
+
+# Publications
+
+`r rpt_content_description("publications")`
+
+```{r}
+tbl_pubs <- get_pubs_tbl(d_pubs_tags) %>% 
+  select(ID, Title, Tags)
+
+datatable(
+  tbl_pubs, 
+  escape = F, rownames = F)
+```

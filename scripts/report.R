@@ -1,6 +1,6 @@
 # reports-v2 functions
 
-library(dplyr)
+librarian::shelf(dplyr, purrr)
 
 get_tbl_ixn <- function(db_tbl, ixn){
   rowids <- get_rowids_with_ixn(glue("{db_tbl}_tags"), ixn)
@@ -11,100 +11,50 @@ get_tbl_ixn <- function(db_tbl, ixn){
     collect()
 }
 
-rpt_content <- function(cntnt, ixns, rmd){
-  # cntnt = contents[1]; ixns = params$interactions
+rpt_content <- function(content, params, gsheet_params, rmd){
+  # content = "projects" # content = "management" # content = "documents"
+  # gsheet_params <- get_gsheet_data("parameters") %>% 
+  #   filter(output == "report") %>% select(-output)
   
-  cntnts_info <- list(
-    projects   = list(
-      method     = "child_rmd",
-      # TODO: migrate from csv to db
-      # db_tbl     = "projects",  
-      child_rmd  = "_projects.Rmd"),
-    management = list(
-      method     = "tbl_per_ixn",
-      db_tbl     = "tethys_mgt",
-      caption_md = "Literature from [Tethys Knowledge Base](https://tethys.pnnl.gov/knowledge-base-all)."))
+  ixns = params$interactions
   
-  info <- cntnts_info[[cntnt]]
+  g_p       <- filter(gsheet_params, content == !!content)
+  rmd_ixn   <- filter(g_p, variable == "rmd_ixn") %>% pull(value)
+  rmd_noixn <- filter(g_p, variable == "rmd_noixn") %>% pull(value)
   
-  if (info$method == "tbl_per_ixn"){
-    db_tbl     <- info$db_tbl
-    caption_md <- info$db_tbl
+  if (is_empty(rmd_ixn) | is_empty(ixns)){
+    stopifnot(file.exists(rmd_noixn))
     
-    # cntnt <- "management"
-    rmd_ixns <- with(
-      info,
-      lapply(
-        1:length(ixns), 
-        function(i_ixn){ 
-          knitr::knit_expand('_interaction.Rmd') }))
-    
-    list(
-      glue("\n# {stringr::str_to_title(cntnt)}\n", .trim = F)) %>% 
-      append(rmd_ixns) %>% 
-      # knit_child(text = unlist(.), quiet = T) %>% 
-      # paste(sep = '\n\n')
-      unlist() %>% 
+    readLines(rmd_noixn) %>% 
       write(rmd, append = T)
+    
+    return(T)
   }
   
-  if (info$method == "child_rmd"){
-    readLines(info$child_rmd) %>% 
-      write(rmd, append = T)
-  }
+  stopifnot(file.exists(rmd_ixn))
+  rmd_ixns <- lapply(
+    1:length(ixns), 
+    function(i_ixn){ 
+      knitr::knit_expand(rmd_ixn) })
   
+  list(
+    glue('\n# {stringr::str_to_title(content)}\n\n`r rpt_content_description("{content}")`\n\n', .trim = F)) %>% 
+    append(rmd_ixns) %>% 
+    unlist() %>% 
+    write(rmd, append = T)
+
   T
 }
 
-rpt_content_noixns <- function(cntnt, rmd){
-  # cntnt = contents[1]; ixns = params$interactions
-  
-  cntnts_info <- list(
-    projects   = list(
-      method     = "child_rmd",
-      # TODO: migrate from csv to db
-      # db_tbl     = "projects",  
-      child_rmd  = "_projects.Rmd"),
-    management = list(
-      method     = "tbl_noixns",
-      db_tbl     = "tethys_mgt",
-      caption_md = "Literature from [Tethys Knowledge Base](https://tethys.pnnl.gov/knowledge-base-all)."),
-    documents = list(
-      method     = "child_rmd",
-      child_rmd  = "_docs_noixns.Rmd",
-      caption_md = "The FERC eLibrary contains environmental compliance project documents, of which excerpts have been manually tagged for reference."))
-  
-  info <- cntnts_info[[cntnt]]
-  
-  if (info$method == "tbl_noixns"){
-    db_tbl     <- info$db_tbl
-    caption_md <- info$db_tbl
-    
-    # cntnt <- "management"
-    rmd_ixns <- with(
-      info,
-      lapply(
-        1:length(ixns), 
-        function(i_ixn){ 
-          knitr::knit_expand('_content_noixns.Rmd') }))
-    
-    list(
-      glue("\n# {stringr::str_to_title(cntnt)}\n", .trim = F)) %>% 
-      append(rmd_ixns) %>% 
-      # knit_child(text = unlist(.), quiet = T) %>% 
-      # paste(sep = '\n\n')
-      unlist() %>% 
-      write(rmd, append = T)
-  }
-  
-  if (info$method == "child_rmd"){
-    readLines(info$child_rmd) %>% 
-      write(rmd, append = T)
-  }
-  
-  T
+rpt_content_description <- function(content){
+  # content <- "management" # content <- "projects"
+  gsheet_params %>% 
+    filter(
+      content == !!content,
+      variable == "description_md") %>% 
+    pull(value) %>% 
+    md2html()
 }
-
 
 rpt_tbl <- function(d, cntnt, caption_md=""){
   

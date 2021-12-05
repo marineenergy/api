@@ -12,12 +12,17 @@ yml <- args[1]
 # yml="/share/user_reports/ben@ecoquants.com/report_88543ffb.yml"
 # yml="/share/user_reports/ben@ecoquants.com/report_0522bbdd.yml"
 # yml="/share/user_reports/ben@ecoquants.com/report_54759a5a.yml"
+# yml="/share/user_reports/ben@ecoquants.com/report_b68c4dba.yml"
+# yml="/share/user_reports/ben@ecoquants.com/report__noixns.yml"
+# yml="/share/user_reports/ben@ecoquants.com/report__ixns.yml"
 stopifnot(file.exists(yml))
 
 setwd("/share/github/api")
 template_rmd <- "/share/github/api/_report.Rmd"
 source("/share/github/apps_dev/scripts/common.R")
 source(here("scripts/report.R"))
+gsheet_params <- get_gsheet_data("parameters") %>% 
+  filter(output == "report") %>% select(-output)
 
 message(glue("yml: {yml}"))
 
@@ -33,7 +38,7 @@ out <- fs::path_ext_set(yml, glue::glue(".{p$filetype}"))
 message(glue::glue("rmd: {rmd}\nout: {out}"))
 
 # write template with params ----
-lns <- readLines(template_rmd)
+lns <- knitr::knit_expand(template_rmd) %>% strsplit("\n") %>% .[[1]]
 fm  <- rmarkdown::yaml_front_matter(template_rmd)
 idx <- lns %>% 
   grepl(pattern = "---") %>% 
@@ -55,21 +60,10 @@ write(yaml::as.yaml(fm), rmd, append = T)
 write("---", rmd, append = T)
 write(lns[idx:length(lns)], rmd, append = T)
 
-# write contents with interactions ----
+# write contents, possibly per interaction ----
 contents <- names(p$contents)[unlist(p$contents)]
 
-#cntnt = contents[1]
-# source(file.path(dir_scripts, "report.R"))
-
-if (length(p$interactions) == 0) {
-  # source global.R to get d_docs, d_pubs, ...
-  #writeLines('\n```{r}\nsource("/share/github/apps/report-v2/global.R")\n```\n\n', con = rmd) 
-  # TODO: return table of all content (do not filter by ixn) WITH the tags like in the app
-  r <- lapply(contents, rpt_content_noixns, rmd = rmd)
-} else {
-  # carry on as originally designed
-  r <- lapply(contents, rpt_content, ixns = p$interactions, rmd = rmd)
-}
+r <- lapply(contents, rpt_content, params = p, gsheet_params, rmd = rmd)
 
 rmarkdown::render(
   input         = rmd,

@@ -46,16 +46,14 @@ editor_options:
 always_allow_html: true # install.packages("webshot"); webshot::install_phantomjs()
 ---
 
-```{css, echo=F}
-/* make room for ixn_to_colorhtml() */
-.h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
-  line-height: 1.5;
-}
-```
-
 ```{r setup, include=F}
 knitr::opts_chunk$set(echo = F, warning = F, message = F, eval = T)
-# params <- knitr::knit_params(readLines("/share/user_reports/ben@ecoquants.com/report_08affc8d_prj.Rmd"))
+# for interactive debug: 
+# params <- knitr::knit_params(readLines("{{rmd}}"))
+# params$contents        <- params$contents$value
+# params$interactions    <- params$interactions$value
+# params$document_checks <- params$document_checks$value
+
 ```
 
 ```{r init}
@@ -63,7 +61,6 @@ source("/share/github/apps_dev/scripts/common.R")
 source(file.path(dir_scripts, "db.R"))
 source(file.path(dir_scripts, "shiny_report.R"))
 source("/share/github/api/scripts/report.R")
-#df_tags <- get_tags()
 ```
 
 # Configuration

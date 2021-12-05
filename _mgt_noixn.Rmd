@@ -1,0 +1,12 @@
+
+# Management
+
+`r rpt_content_description("management")`
+
+```{r}
+tbl_mgt <- get_mgt_tbl(d_mgt_tags)
+
+datatable(
+  tbl_mgt, 
+  escape = F, rownames = F)
+```

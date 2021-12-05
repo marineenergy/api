@@ -1,0 +1,11 @@
+
+## `r ixn_to_colorhtml(params$interactions[[{{i_ixn}}]], df_tags)`
+
+```{r}
+tbl_pubs <- get_pubs_tbl(d_pubs_tags, params$interactions[{{i_ixn}}]) %>% 
+  select(ID, Title, Tags)
+
+datatable(
+  tbl_pubs, 
+  escape = F, rownames = F)
+```
