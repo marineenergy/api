@@ -6,9 +6,10 @@
 ```{r}
 tbl_spatial <- get_spatial_tbl(
   d_spatial_tags, 
-  aoi_wkt = sf_to_wkt(params$spatial_aoi_wkt)) %>% 
+  aoi_wkt = params$spatial_aoi_wkt) %>% 
   mutate(
     `Rows in Results` = map_int(sp_data, nrow)) %>% 
+  filter(`Rows in Results` > 0) %>% 
   select(ID, Title, Tags, `Rows in Results`) # , sp_data)
 
 datatable(
