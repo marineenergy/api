@@ -1,0 +1,16 @@
+
+# Spatial
+
+`r rpt_content_description("spatial")`
+
+```{r}
+tbl_spatial <- get_spatial_tbl(
+  d_spatial_tags,
+  aoi_wkt = params$spatial_aoi_wkt) %>%
+  mutate(
+    `Rows in Results` = map_int(sp_data, nrow)) %>%
+  filter(`Rows in Results` > 0) # %>%
+# saveRDS(tbl_spatial, glue("{dir_api}/_tmp_tbl_spatial.rds"))
+# tbl_spatial <- readRDS(glue("{dir_api}/_tmp_tbl_spatial.rds"))
+```
+

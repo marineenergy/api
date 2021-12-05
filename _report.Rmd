@@ -60,7 +60,7 @@ knitr::opts_chunk$set(echo = F, warning = F, message = F, eval = T)
 source("/share/github/apps_dev/scripts/common.R")
 source(file.path(dir_scripts, "db.R"))
 source(file.path(dir_scripts, "shiny_report.R"))
-source("/share/github/api/scripts/report.R")
+source(file.path(dir_api, "scripts/report.R"))
 ```
 
 # Configuration

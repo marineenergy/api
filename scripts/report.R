@@ -19,8 +19,16 @@ rpt_content <- function(content, params, gsheet_params, rmd){
   ixns = params$interactions
   
   g_p       <- filter(gsheet_params, content == !!content)
+  rmd_pfx   <- filter(g_p, variable == "rmd_pfx") %>% pull(value)
   rmd_ixn   <- filter(g_p, variable == "rmd_ixn") %>% pull(value)
   rmd_noixn <- filter(g_p, variable == "rmd_noixn") %>% pull(value)
+  
+  if (!is_empty(rmd_pfx)){
+    stopifnot(file.exists(rmd_pfx))
+    
+    readLines(rmd_pfx) %>% 
+      write(rmd, append = T)
+  }
   
   if (is_empty(rmd_ixn) | is_empty(ixns)){
     stopifnot(file.exists(rmd_noixn))
@@ -31,18 +39,20 @@ rpt_content <- function(content, params, gsheet_params, rmd){
     return(T)
   }
   
+  if (is_empty(rmd_pfx)){
+    glue('\n# {stringr::str_to_title(content)}\n\n`r rpt_content_description("{content}")`\n\n', .trim = F) %>% 
+      write(rmd, append = T)
+  }
+  
   stopifnot(file.exists(rmd_ixn))
   rmd_ixns <- lapply(
     1:length(ixns), 
     function(i_ixn){ 
       knitr::knit_expand(rmd_ixn) })
-  
-  list(
-    glue('\n# {stringr::str_to_title(content)}\n\n`r rpt_content_description("{content}")`\n\n', .trim = F)) %>% 
-    append(rmd_ixns) %>% 
+  rmd_ixns %>% 
     unlist() %>% 
     write(rmd, append = T)
-
+  
   T
 }
 

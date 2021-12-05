@@ -1,17 +1,19 @@
 
-## `r ixn_to_colorhtml(params$interactions[[{{i_ixn}}]], df_tags)`
-
 ```{r}
-tbl_spatial <- get_spatial_tbl(
-  d_spatial_tags, 
-  ixns    = params$interactions[{{i_ixn}}], 
-  aoi_wkt = params$spatial_aoi_wkt) %>% 
-  mutate(
-    `Rows in Results` = map_int(sp_data, nrow)) %>%
-  filter(`Rows in Results` > 0) %>% 
-  select(ID, Title, Tags, `Rows in Results`) # , sp_data)
+ixn <- params$interactions[[{{i_ixn}}]]
+```
 
-datatable(
-  tbl_spatial, 
-  escape = F, rownames = F)
+## `r ixn_to_colorhtml(ixn, df_tags)`
+
+```{r, results='asis'}
+rowids <- get_rowids_with_ixn(ixn, db_tbl = "mc_spatial_tags", categories = c("Receptor")) %>% 
+      unlist() %>% unique()
+ds <- tbl_spatial %>%
+  filter(
+    ID %in% rowids)
+
+lapply(1:nrow(ds), function(i_spatial) { # i_spatial = 1
+  knitr::knit_expand(glue("{dir_api}/_spatial_dataset.Rmd")) }) %>%
+  knitr::knit_child(text = unlist(.), quiet = T) %>% 
+  cat(sep = '\n\n')
 ```
