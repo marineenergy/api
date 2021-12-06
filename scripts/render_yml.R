@@ -16,6 +16,7 @@ yml <- args[1]
 # yml="/share/user_reports/ben@ecoquants.com/report__noixns.yml"
 # yml="/share/user_reports/ben@ecoquants.com/report__ixns.yml"
 # yml="/share/user_reports/ben@ecoquants.com/report_4a58cde3.yml"
+# yml="/share/user_reports/ben@ecoquants.com/report_bf505f59.yml"
 stopifnot(file.exists(yml))
 
 setwd("/share/github/api")

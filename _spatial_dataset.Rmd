@@ -1,15 +1,12 @@
 
 ```{r}
-i = {{i_spatial}} # i = 1
+i = {{i_spatial}} # i = 2
 d <- ds %>% slice(i)
 ```
 
 ### `r d$title`
 
 ```{r}
-# source("functions.R"); stressor = "EMF"
-#tabulate_dataset_shp_within_aoi(d$code, params$aoi_wkt)
-#tabulate_dataset_shp_within_aoi3
 d$sp_data[[1]] %>% 
   datatable(escape = F, rownames = F)
 ```

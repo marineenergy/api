@@ -6,6 +6,7 @@
 ```{r}
 tbl_spatial <- get_spatial_tbl(
   d_spatial_tags,
+  ixns    = params$interactions, 
   aoi_wkt = params$spatial_aoi_wkt) %>%
   mutate(
     `Rows in Results` = map_int(sp_data, nrow)) %>%
