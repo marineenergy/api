@@ -113,7 +113,7 @@ function(
   # in_rmd      <- "report-v2_template.Rmd"
   r_script    <- "/share/github/api/scripts/render_yml.R"
   
-  browser()
+  #browser()
   # metadata
   m <- list(
     email           = email,
@@ -129,7 +129,8 @@ function(
   print(m)
   
   # paths, output
-  hsh <- digest::digest(m, algo="crc32")
+  hsh <- digest::digest(m, algo="crc32") 
+  # hsh = "7df59d4c"; email = "ben@ecoquants.com"; m = list(filetype = "html")
   yml <- glue::glue("{dir_rpt_pfx}/{email}/report_{hsh}.yml")
   rpt <- fs::path_ext_set(yml, m$filetype)
   log <- fs::path_ext_set(yml, ".txt")

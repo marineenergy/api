@@ -4,7 +4,7 @@
 `r rpt_content_description("publications")`
 
 ```{r}
-tbl_pubs <- get_pubs_tbl(d_pubs_tags) %>% 
+tbl_pubs <- get_pubs_tbl() %>% 
   select(ID, Title, Tags)
 
 datatable(

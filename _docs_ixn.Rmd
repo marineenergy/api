@@ -3,7 +3,7 @@
 
 ```{r}
 tbl_docs <- get_docs_tbl(
-  d_docs_tags, params$interactions[{{i_ixn}}], params$document_checks)
+  params$interactions[{{i_ixn}}], params$document_checks)
 
 datatable(
   tbl_docs, 

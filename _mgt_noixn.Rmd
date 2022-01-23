@@ -4,7 +4,7 @@
 `r rpt_content_description("management")`
 
 ```{r}
-tbl_mgt <- get_mgt_tbl(d_mgt_tags)
+tbl_mgt <- get_mgt_tbl()
 
 datatable(
   tbl_mgt, 

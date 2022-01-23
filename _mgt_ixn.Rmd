@@ -2,7 +2,7 @@
 ## `r ixn_to_colorhtml(params$interactions[[{{i_ixn}}]], df_tags)`
 
 ```{r}
-tbl_mgt <- get_mgt_tbl(d_mgt_tags, params$interactions[{{i_ixn}}])
+tbl_mgt <- get_mgt_tbl(params$interactions[{{i_ixn}}])
 
 datatable(
   tbl_mgt, 

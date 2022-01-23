@@ -4,7 +4,7 @@
 `r rpt_content_description("documents")`
 
 ```{r}
-tbl_docs <- get_docs_tbl(d_docs_tags, cks = params$document_checks)
+tbl_docs <- get_docs_tbl(cks = params$document_checks)
 
 datatable(
   tbl_docs, 

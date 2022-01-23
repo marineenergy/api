@@ -6,7 +6,7 @@
 ## Map
 
 ```{r}
-tbl_projects <- get_projects_tbl(d_projects_tags, ixns = params$interactions)
+tbl_projects <- get_projects_tbl(ixns = params$interactions)
 map_projects(tbl_projects)
 ```
 

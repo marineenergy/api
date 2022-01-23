@@ -5,12 +5,13 @@
 
 ```{r}
 tbl_spatial <- get_spatial_tbl(
-  d_spatial_tags,
   ixns    = params$interactions, 
-  aoi_wkt = params$spatial_aoi_wkt) %>%
+  aoi_wkt = params$spatial_aoi_wkt)
+
+if (!"sp_data" %in% names(tbl_spatial))
+  tbl_spatial <- tbl_spatial %>%
   mutate(
-    `Rows in Results` = map_int(sp_data, nrow)) %>%
-  filter(`Rows in Results` > 0) # %>%
+    sp_data = map(code, get_spatial_intersection, params$spatial_aoi_wkt))
 # saveRDS(tbl_spatial, glue("{dir_api}/_tmp_tbl_spatial.rds"))
 # tbl_spatial <- readRDS(glue("{dir_api}/_tmp_tbl_spatial.rds"))
 ```

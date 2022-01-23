@@ -7,6 +7,15 @@ d <- ds %>% slice(i)
 ### `r d$title`
 
 ```{r}
-d$sp_data[[1]] %>% 
-  datatable(escape = F, rownames = F)
+d_sp <- d$sp_data[[1]]
+nmax <- 1000
+
+caption <- ifelse(
+  nrow(d_sp) > nmax,
+  glue("Sorry, only the first {nmax} of {nrow(d_sp)} records will be displayed. Please describe a smaller Location to get specific records of interest."),
+  "")
+
+d_sp %>% 
+  slice(1:nmax) %>% 
+  datatable(escape = F, rownames = F, caption = caption)
 ```
