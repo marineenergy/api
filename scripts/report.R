@@ -2,6 +2,29 @@
 
 librarian::shelf(dplyr, purrr)
 
+get_rowids_with_ixn <- function(db_tbl, ixn, categories = NULL){
+  # db_tbl = "tethys_mgt_tags"; ixn = c("Receptor.Fish", "Stressor.PhysicalInteraction.Collision")
+  # db_tbl = "mc_spatial_tags"; ixn = values$ixns %>% unlist()
+  # ixn = list(c(""Receptor.Birds","Stressor.HabitatChange"))
+  
+  #browser()
+  
+  # subset interactions by categories available to content type
+  if (!is.null(categories)){
+    ixn_categories <- str_extract(ixn, "^[A-z]+")
+    ixn <- ixn[ixn_categories %in% categories]
+  }
+  
+  if (length(ixn) > 0){
+    sql <- glue("SELECT rowid FROM {db_tbl} WHERE tag_sql ~ '{ixn}.*'") %>% 
+      paste(collapse = "\nINTERSECT\n")
+  } else {
+    sql <- glue("SELECT DISTINCT rowid FROM {db_tbl}")
+  }
+  DBI::dbGetQuery(con, sql) %>% 
+    pull(rowid)
+}
+
 get_tbl_ixn <- function(db_tbl, ixn){
   rowids <- get_rowids_with_ixn(glue("{db_tbl}_tags"), ixn)
   
