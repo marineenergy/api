@@ -8,17 +8,7 @@ if (length(args) != 1) {
   stop("Only 1 required argument missing: yml", call.=FALSE)
 }
 yml <- args[1]
-# yml="/share/user_reports/ben@ecoquants.com/report__test.yml"
-# yml="/share/user_reports/ben@ecoquants.com/report_88543ffb.yml"
-# yml="/share/user_reports/ben@ecoquants.com/report_0522bbdd.yml"
-# yml="/share/user_reports/ben@ecoquants.com/report_54759a5a.yml"
-# yml="/share/user_reports/ben@ecoquants.com/report_b68c4dba.yml"
-# yml="/share/user_reports/ben@ecoquants.com/report__noixns.yml"
-# yml="/share/user_reports/ben@ecoquants.com/report__ixns.yml"
-# yml="/share/user_reports/ben@ecoquants.com/report_4a58cde3.yml"
-# yml="/share/user_reports/ben@ecoquants.com/report_bf505f59.yml"
-# yml="/share/user_reports/ben@ecoquants.com/report_7df59d4c.yml"
-# yml="/share/user_reports/ben@ecoquants.com/report_6a8c7d5b.yml"
+# yml="/share/user_reports/ben@ecoquants.com/report_947f20ae.yml"
 stopifnot(file.exists(yml))
 
 setwd("/share/github/api")
