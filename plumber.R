@@ -183,7 +183,7 @@ function(
         names(m$contents)[unlist(m$contents)] %>% 
           stringr::str_to_title() %>% 
           paste(collapse=", ")),
-      n_ixns     = purrr::map_chr(m, function(m) length(m$interactions)),
+      n_ixns     = purrr::map_int(m, function(m) length(m$interactions)),
       rpt        = purrr::map2_chr(yml, ext, fs::path_ext_set),
       rpt_exists = file.exists(rpt),
       status     = ifelse(rpt_exists, "published", "submitted"),

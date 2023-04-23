@@ -8,17 +8,20 @@ if (length(args) != 1) {
   stop("Only 1 required argument missing: yml", call.=FALSE)
 }
 yml <- args[1]
+message(paste("yml:", yml))
 # yml="/share/user_reports/ben@ecoquants.com/report_947f20ae.yml"
+# yml="/share/user_reports/ben@ecoquants.com/report_adba3571.yml"
 stopifnot(file.exists(yml))
 
+message("sourcing")
 setwd("/share/github/api")
 template_rmd <- "/share/github/api/_report.Rmd"
 source("/share/github/apps_dev/scripts/common.R")
 source(here("scripts/report.R"))
+
+message('get_gsheet_data("parameters")')
 gsheet_params <- get_gsheet_data("parameters") %>% 
   filter(output == "report") %>% select(-output)
-
-message(glue("yml: {yml}"))
 
 # params ----
 p <- yaml2params(yml, frontmatter = F)
