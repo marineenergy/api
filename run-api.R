@@ -13,6 +13,23 @@ pr(plumber_r) %>%
   pr_set_error(error_handler) %>%
   pr_run(port=8888, host="0.0.0.0")
 
+# 2023-05-01 bbest update ----
+# sudo apt-get update
+# sudo apt-get install nodejs npm
+#   nodejs is already the newest version (10.19.0~dfsg-3ubuntu1).
+#   npm is already the newest version (6.14.4+ds-1ubuntu2)
+# In order to get pm2 to startup your services on boot, I ran:
+#  run sudo pm2 startup 
+# which will create the necessary files for your system to run pm2 when you boot your machine.
+
+# new commands as root ---
+# sudo pm2 start --interpreter="Rscript" /share/github/api/run-api.R
+# sudo pm2 list
+# sudo pm2 save
+# sudo pm2 logs run-api --lines 1000
+# sudo pm2 restart run-api
+
+# old commands as shiny ---
 # sudo -u shiny pm2 restart run-api
 # sudo -u shiny pm2 stop run-api
 # sudo -u shiny pm2 start run-api
