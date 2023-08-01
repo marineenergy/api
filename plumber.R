@@ -26,66 +26,158 @@ url_rpt_pfx <- "https://marineenergy.app/report"
 #* @apiVersion 0.1.9
 #* @apiContact Ben Best <ben@ecoquants.com>
 
+# /ba_docs ----
+#' Biological Assessment document excerpts in PRIMRE export metadata format
+#' @get /ba_docs
+function(){
+  # TODO:
+  # - excerpts:
+  #   - generate excertps/ba_#.html
+  #   - + link to Report interface w/ mention of BA / Documents (FERC) tabs
+  # - files:
+  #   - mv Google Drive mhk-env/ba/*.gdoc to *.docx to www/files/*.docx;
+  #     update ba_docs.ba_doc_url
+  # - update date_created,date_modified in Shiny apps/edit
+  # - add author (optionally organization) to tbl(con, "ba_docs")
+  
+  # [Appendix B. PRIMRE Metadata Schema](https://openei.org/wiki/PRIMRE/Developer_Documents#appendB)
+  
+  # update once
+  #   From: Sharon Kramer <skramer@harveyecology.com>
+  #   Date: Wed, Apr 26, 2023 at 3:34 PM
+  #   Subject: Tagging done?! [for BA not FERC]
+  # dbExecute(con, "ALTER TABLE ba_doc_excerpts ADD COLUMN IF NOT EXISTS date_created DATE")
+  # dbExecute(con, "ALTER TABLE ba_doc_excerpts ADD COLUMN IF NOT EXISTS date_modified DATE")
+  # dbExecute(con, "UPDATE ba_doc_excerpts SET date_created  = '2022-04-26'")
+  # dbExecute(con, "UPDATE ba_doc_excerpts SET date_modified = '2022-04-26'")
+  
+  d_tags <- tbl(con, "ba_doc_excerpt_tags") |> 
+    left_join(
+      tbl(con, "tags"),
+      by = "tag_sql") |> 
+    filter(category != "Technology") |> 
+    arrange(rowid, tag) |> 
+    select(rowid, tag) |> 
+    collect() |> 
+    group_by(rowid) |> 
+    nest(
+      tags = tag) |> 
+    mutate(
+      tags = map(tags, unlist))
+
+  d <- tbl(con, "ba_doc_excerpts") |>
+    left_join(
+      tbl(con, "ba_docs"),
+      by = "ba_doc_file") |> 
+    left_join(
+      tbl(con, "ba_projects") |> 
+        left_join(
+          tbl(con, "tags"),
+          by = c("tag_technology" = "tag_sql")) |> 
+        select(ba_project, tag_tech = tag_nocat),
+      by = "ba_project") |> 
+    left_join(
+      tbl(con, "ba_sites"),
+      by = "ba_project") |> 
+    collect() |> 
+    mutate(
+      URI             = glue("https://marineenergy.app/excerpts/ba_{rowid}.html"),
+      type            = "Document/Report",
+      sourceURL       = ba_doc_url,
+      title           = glue("{ba_project}: {ba_doc_file}"),
+      description     = excerpt,
+      author          = prepared_by,
+      organization    = institution,
+      originationDate = date_report,
+      spatial         = map2(lon, lat, \(x, y){
+        list(
+          extent = "point",
+          coordinates = c(y, x)) }),
+      technologyType  = tag_tech) |> 
+    left_join(
+      d_tags,
+      by = "rowid") |> 
+    mutate(
+      modifiedDate = date_modified) |> 
+    select(
+      URI, type, sourceURL, title, description, author, organization,
+      originationDate, spatial, technologyType, tags,
+      modifiedDate)
+  
+  d
+}
+
 # /ferc_docs ----
-#' FERC docs in PRIMRE export metadata format
+#' FERC document excerpts in PRIMRE export metadata format
 #' @get /ferc_docs
 function(){
+
+  # [Appendix B. PRIMRE Metadata Schema](https://openei.org/wiki/PRIMRE/Developer_Documents#appendB)
   
-  dir_data <- here("../apps/data")
-  docs_csv <- glue("{dir_data}/ferc_docs2.csv")
-  
-  date_fetched <- file_info(docs_csv) %>% pull(change_time) %>% as.Date()
-  
-  docs_0 <- read_csv(docs_csv, col_types = cols()) %>% 
-    rename(doc_id = doc)
-  
-  docs <- docs_0 %>% 
-    select(doc_id, url, technology) %>% 
-    group_by(doc_id) %>% 
-    summarize(
-      url        = first(na.omit(url)), 
-      technology = first(na.omit(technology)), 
-      .groups    = "drop_last") %>%  # only 4 of 118 entries with url
+  # update once
+  #   From: Sharon Kramer <skramer@harveyecology.com>
+  #   Date: Wed, Apr 26, 2023 at 3:34 PM
+  #   Subject: Tagging done?! [for BA not FERC]
+  # dbExecute(con, "ALTER TABLE ferc_docs ADD COLUMN IF NOT EXISTS date_created DATE")
+  # dbExecute(con, "ALTER TABLE ferc_docs ADD COLUMN IF NOT EXISTS date_modified DATE")
+  # dbExecute(con, "UPDATE ferc_docs SET date_created  = '2022-04-26'")
+  # dbExecute(con, "UPDATE ferc_docs SET date_modified = '2022-04-26'")
+  # TODO: udpate date_created, date_modified in /edit Shiny app
+
+  d_tags <- tbl(con, "ferc_doc_tags") |> 
+    left_join(
+      tbl(con, "tags"),
+      by = "tag_sql") |> 
+    filter(category != "Technology") |> 
+    arrange(rowid, tag) |> 
+    select(rowid, tag) |> 
+    collect() |> 
+    group_by(rowid) |> 
+    nest(
+      tags = tag) |> 
     mutate(
-      # TODO: doc_id without any special characters or spaces [a-Z_-]
-      URI               = glue("https://mhkdr.openei.org/data/{doc_id}"),
-      type              = "Document/Report",
-      landingPage       = URI,   # TODO: make pages
-      sourceURL         = url,
-      title             = doc_id,
-      description       = "TBD", # TODO: required field for PRIMRE
-      author            = map(NA, function(x) list("Maria Carnevale", "Sharon Kramer")), # TODO: add fields
-      organization      = "MarineEnergy.app",
-      originationDate   = as.Date("2021-11-07"), # TODO: handle date add/modify in future
-      spatial           = map(NA, function(x) 
-        list( # TODO: required fields lat,lon; default to global
-          extent                = "boundingBox",
-          boundingCoordinatesNE = c( 90,  180),
-          boundingCoordinatesSW = c(-90, -180))),
-      technologyType    = str_replace(technology, "Marine Energy.", ""),
-      signatureProject  = NA, # TODO: cross-list with Projects
-      modifiedDate      = date_fetched)
+      tags = map(tags, unlist))
   
-  doc_tags <- docs_0 %>% 
-    select(doc_id, receptor, stressor, phase) %>% 
+  d <- tbl(con, "ferc_docs") |>
+    collect() |> 
+    left_join(
+      tbl(con, "projects") |> 
+        collect() |> 
+        # pull(tag_technology) |> 
+        # unique() # "Current.Tidal"    "Wave"             "Current.Riverine"
+        left_join(
+          tbl(con, "tags") |> 
+            filter(category == "Technology") |> 
+            collect() |> 
+            mutate(
+              tag_technology = str_replace(tag_sql, "^Technology.", "")),
+          by = "tag_technology") |> 
+        select(project, tag_tech = tag_nocat, lon = longitude, lat = latitude),
+      by = "project") |> 
     mutate(
-      receptor = str_replace(receptor, fixed('.'), '/'),
-      stressor = str_replace(stressor, fixed('.'), '/')) %>% 
-    pivot_longer(-doc_id, names_to = "category", values_to = "tag") %>% 
-    filter(!is.na(tag)) %>% 
+      URI             = glue("https://marineenergy.app/excerpts/ferc_{rowid}.html"),
+      type            = "Document/Report",
+      sourceURL       = prj_doc_attach_url,
+      title           = glue("{project}: {prj_document}"),
+      description     = detail,
+      author          = NA,
+      originationDate = date_created,
+      spatial         = map2(lon, lat, \(x, y){
+        list(
+          extent = "point",
+          coordinates = c(y, x)) }),
+      technologyType  = tag_tech) |> 
+    left_join(
+      d_tags,
+      by = "rowid") |> 
     mutate(
-      tag = glue("{str_to_title(category)}/{tag}")) %>% 
-    select(-category) %>% 
-    group_by(doc_id) %>% 
-    nest(tags = c(tag)) %>% 
-    mutate(
-      tags = map(tags, function(x){ x %>% unlist %>% sort %>% unique}))
+      modifiedDate = date_modified) |> 
+    select(
+      URI, type, sourceURL, title, description, author,
+      originationDate, spatial, technologyType, tags,
+      modifiedDate)
   
-  docs <- docs %>% 
-    left_join(doc_tags, by = "doc_id") %>% 
-    select(-doc_id, -url, -technology)
-  
-  docs
+  d
 }
 
 # /report ----
