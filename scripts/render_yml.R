@@ -66,3 +66,5 @@ rmarkdown::render(
   input         = rmd,
   output_file   = out, 
   clean = F)
+
+Sys.chmod(out,'777')

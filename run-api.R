@@ -11,7 +11,7 @@ error_handler <- function(req, res, err){
 
 pr(plumber_r) %>%
   pr_set_error(error_handler) %>%
-  pr_run(port=8888, host="0.0.0.0")
+  pr_run(port=8000, host="0.0.0.0")
 
 # 2023-05-01 bbest update ----
 # sudo apt-get update

@@ -41,7 +41,7 @@ rpt_content <- function(content, params, gsheet_params, rmd){
   
   ixns = params$interactions
   
-  g_p       <- filter(gsheet_params, content == !!content)
+  g_p       <- filter(gsheet_params, content == tolower(!!content))
   rmd_pfx   <- filter(g_p, variable == "rmd_pfx") %>% pull(value)
   rmd_ixn   <- filter(g_p, variable == "rmd_ixn") %>% pull(value)
   rmd_noixn <- filter(g_p, variable == "rmd_noixn") %>% pull(value)

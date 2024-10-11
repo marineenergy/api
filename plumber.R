@@ -4,8 +4,8 @@ if (!require(librarian)){
   library(librarian)
 }
 shelf(
-  dplyr, digest, fs, glue, here, httr, jsonlite, purrr, rmarkdown, readr, 
-  stringr, tibble, tidyr, yaml)
+  dplyr, digest, fs, glue, here, httr, jsonlite, markdown, purrr, rmarkdown, 
+  readr, stringr, tibble, tidyr, yaml)
 
 #source("/share/github/apps_dev/functions.R")
 source("/share/github/apps/scripts/common_2.R")
